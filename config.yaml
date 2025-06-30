@@ -1,0 +1,21 @@
+# This is a template yaml for the aptos-indexer-processor.
+health_check_port: 8085
+server_config:
+  processor_config:
+    type: "contract_processor"
+  transaction_stream_config:
+    indexer_grpc_data_service_address: "https://grpc.testnet.aptoslabs.com:443"
+    # At which tx version to start indexing, usually this is the tx version when the contract was deployed
+    starting_version: 6797190538
+    # At which tx version to stop indexing
+    # request_ending_version: 6797190540
+    # Go to https://developers.aptoslabs.com/ to create a project and get an API token
+    auth_token: "aptoslabs_UuvvQQjBfQJ_F8pNuQ4zfLADqnAhwj8dTV8JQs99xgjJY"
+    request_name_header: ""
+  db_config:
+    # do not include the ?sslmode=require in the connection string when using cloud DB, it will cause an error
+    postgres_connection_string: "postgres://postgres:postgres@0.0.0.0:7377/sapi_indexer"
+    # we set db_pool_size to a lower number on cloud because we use a free plan
+    db_pool_size: 25
+  contract_config:
+    contract_address: "0x9fb0c0e685c7f5f090be74b635da0d88a1f3fec8a1377384ace4de704e33e5c4"
