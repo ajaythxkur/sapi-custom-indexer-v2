@@ -13,9 +13,7 @@ use async_trait::async_trait;
 use rayon::prelude::*;
 
 use crate::db_models::{
-    pools::{PoolCreatedEventOnChain, Pool},
-    module_upgrade::ModuleUpgrade,
-    package_upgrade::{PackageUpgrade, PackageUpgradeChangeOnChain},
+    module_upgrade::ModuleUpgrade, package_upgrade::{PackageUpgrade, PackageUpgradeChangeOnChain}, pool_tokens::{PoolToken, PoolTokenEventOnChain}, pools::{Pool, PoolCreatedEventOnChain}
 };
 
 /// Extractor is a step that extracts events and their metadata from transactions.
@@ -127,7 +125,7 @@ pub struct TransactionContextData {
 #[derive(Debug, Clone)]
 pub enum ContractEvent {
     CreatePoolEvent(Pool),
-    // UpdateMessageEvent(Message),
+    PoolTokenEvent(PoolToken)
 }
 
 impl ContractEvent {
@@ -146,7 +144,7 @@ impl ContractEvent {
                 .as_str(),
             ) {
                 println!("CreateMessageEvent {}", event.data.as_str());
-                let create_message_event_on_chain: PoolCreatedEventOnChain =
+                let create_pool_event_on_chain: PoolCreatedEventOnChain =
                     serde_json::from_str(event.data.as_str()).unwrap_or_else(|_| {
                         panic!(
                             "Failed to parse CreateMessageEvent, {}",
@@ -154,29 +152,27 @@ impl ContractEvent {
                         )
                     });
                 Some(ContractEvent::CreatePoolEvent(
-                    create_message_event_on_chain.to_db_message(),
+                    create_pool_event_on_chain.to_db_message(),
                 ))
-            } 
-            // else if t.starts_with(
-            //     format!(
-            //         "{}::custom_indexer_ex_message_board::UpdateMessageEvent",
-            //         contract_address
-            //     )
-            //     .as_str(),
-            // ) {
-            //     println!("UpdateMessageEvent {}", event.data.as_str());
-            //     let update_message_event_on_chain: UpdateMessageEventOnChain =
-            //         serde_json::from_str(event.data.as_str()).unwrap_or_else(|_| {
-            //             panic!(
-            //                 "Failed to parse UpdateMessageEvent, {}",
-            //                 event.data.as_str()
-            //             )
-            //         });
-            //     Some(ContractEvent::UpdateMessageEvent(
-            //         update_message_event_on_chain.to_db_message(event_idx as i64),
-            //     ))
-            // } 
-            else {
+            } else if t.starts_with(
+                format!(
+                    "{}::events::PoolTokenEvent",
+                    contract_address
+                )
+                .as_str(),
+            ) {
+                println!("PoolTokenEvent {}", event.data.as_str());
+                let create_pool_token_event_on_chain: PoolTokenEventOnChain =
+                    serde_json::from_str(event.data.as_str()).unwrap_or_else(|_| {
+                        panic!(
+                            "Failed to parse PoolTokenEvent, {}",
+                            event.data.as_str()
+                        )
+                    });
+                Some(ContractEvent::PoolTokenEvent(
+                    create_pool_token_event_on_chain.to_db_message(),
+                ))
+            } else {
                 None
             }
         } else {

@@ -13,7 +13,7 @@ use crate::{
     },
 };
 
-const POINT_PER_NEW_MESSAGE: i64 = 2;
+// const POINT_PER_NEW_MESSAGE: i64 = 2;
 
 async fn execute_create_pool_events_sql(
     conn: &mut AsyncPgConnection,
@@ -111,7 +111,7 @@ pub async fn process_create_pool_events(
             // let user_stats_changes = user_stats_changes.clone();
             tokio::spawn(async move {
                 let conn = &mut get_db_connection(&pool).await.expect(
-                    "Failed to get connection from pool while processing create message events",
+                    "Failed to get connection from pool while processing create pool events",
                 );
                 execute_create_pool_events_sql(conn, items).await
             })

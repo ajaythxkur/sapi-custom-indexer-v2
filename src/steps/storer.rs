@@ -11,6 +11,7 @@ use super::{
     extractor::{ContractEvent, ContractUpgradeChange, TransactionContextData},
     storers::{
         create_pool_event_storer::process_create_pool_events,
+        pool_token_event_storer::process_create_pool_token_events,
         upgrade_module_change_storer::process_upgrade_module_changes,
         upgrade_package_change_storer::process_upgrade_package_changes,
     },
@@ -51,18 +52,18 @@ impl Processable for Storer {
     ) -> Result<Option<TransactionContext<TransactionContextData>>, ProcessorError> {
         let per_table_chunk_sizes: AHashMap<String, usize> = AHashMap::new();
         let data = transaction_context_data.data.clone();
-        let (create_events) = data.events.into_iter().fold(
-            (vec![]),
-            |(mut create_events), event| {
+        let (create_events, create_pool_token_events) = data.events.into_iter().fold(
+            (vec![], vec![]),
+            |(mut create_events, mut create_pool_token_events), event| {
                 match event {
                     ContractEvent::CreatePoolEvent(message) => {
                         create_events.push(message);
                     }
-                    // ContractEvent::UpdateMessageEvent(message) => {
-                    //     update_events.push(message);
-                    // }
+                    ContractEvent::PoolTokenEvent(message) => {
+                        create_pool_token_events.push(message);
+                    }
                 }
-                (create_events)
+                (create_events, create_pool_token_events)
             },
         );
 
@@ -73,12 +74,12 @@ impl Processable for Storer {
         )
         .await?;
 
-        // process_update_message_events(
-        //     self.pool.clone(),
-        //     per_table_chunk_sizes.clone(),
-        //     update_events,
-        // )
-        // .await?;
+        process_create_pool_token_events(
+            self.pool.clone(),
+            per_table_chunk_sizes.clone(),
+            create_pool_token_events,
+        )
+        .await?;
 
         let (module_upgrades, package_upgrades) = data.changes.into_iter().fold(
             (vec![], vec![]),

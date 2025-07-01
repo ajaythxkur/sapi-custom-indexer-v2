@@ -52,6 +52,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    processor_status (processor) {
+        #[max_length = 50]
+        processor -> Varchar,
+        last_success_version -> Int8,
+        last_updated -> Timestamp,
+        last_transaction_timestamp -> Nullable<Timestamp>,
+    }
+}
+
+diesel::table! {
     pools (pool_addr) {
         #[max_length = 66]
         user -> Varchar,
@@ -70,57 +80,12 @@ diesel::table! {
 }
 
 diesel::table! {
-    processor_status (processor) {
-        #[max_length = 50]
-        processor -> Varchar,
-        last_success_version -> Int8,
-        last_updated -> Timestamp,
-        last_transaction_timestamp -> Nullable<Timestamp>,
-    }
-}
-
-diesel::table! {
-    quests (id) {
-        id -> Int4,
-        #[max_length = 255]
-        description -> Varchar,
-        #[max_length = 255]
-        button_icon -> Nullable<Varchar>,
-        #[max_length = 255]
-        button_text -> Nullable<Varchar>,
-        points -> Int4,
-        #[max_length = 255]
-        href -> Nullable<Varchar>,
-        #[max_length = 255]
-        button_action -> Nullable<Varchar>,
-        #[max_length = 255]
-        category -> Nullable<Varchar>,
-        is_deprecated -> Nullable<Bool>,
-        #[max_length = 255]
-        verifying_value -> Nullable<Varchar>,
-        #[max_length = 255]
-        dependency -> Nullable<Varchar>,
-        createdAt -> Timestamptz,
-        updatedAt -> Timestamptz,
-    }
-}
-
-diesel::table! {
-    socials (id) {
-        id -> Int4,
-        account_id -> Int4,
-        #[max_length = 255]
-        social_key -> Varchar,
-        #[max_length = 255]
-        social_id -> Varchar,
-        #[max_length = 255]
-        username -> Varchar,
-        #[max_length = 255]
-        display_name -> Nullable<Varchar>,
-        #[max_length = 255]
-        display_image -> Nullable<Varchar>,
-        createdAt -> Timestamptz,
-        updatedAt -> Timestamptz,
+    pool_tokens (address) {
+        #[max_length = 66]
+        address -> Varchar,
+        name -> Varchar,
+        symbol -> Varchar,
+        decimals -> Int8,
     }
 }
 
@@ -129,8 +94,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     ledger_infos,
     module_upgrade_history,
     package_upgrade_history,
-    pools,
     processor_status,
-    quests,
-    socials,
+    pools,
+    pool_tokens,
 );
